@@ -1,0 +1,19 @@
+#!/bin/bash
+# command to maintain the scan-to destination list in the HP Color LaserJet 2840 printer
+
+source /etc/hp-netscan.conf
+
+if [ "$1" == "-a" ]; then
+    name=$2
+    postdata="AddScanToDest_1=$HOSTNAME^${name/:/%3a}^DestFolder"
+    wget -q -O - --post-data="$postdata" http://${PRINTER}/hp/device/set_config.html
+elif [ "$1" == "-d" ]; then
+    name=$2
+    postdata="RemoveScanToDest_1=${name/:/%3a}"
+    wget -q -O - --post-data="$postdata" http://${PRINTER}/hp/device/set_config.html
+elif [ "$1" == "-l" ]; then
+    wget -q -O - http://${PRINTER}/hp/device/info_scanto_destinations.xml \
+    | sed -n '/<DeviceDisplay>/s/<\/*DeviceDisplay>//gp'
+else
+    echo 'usage: scanto_destination -l -a <destname> -d <destname> for listing adding and deleting destinations'
+fi

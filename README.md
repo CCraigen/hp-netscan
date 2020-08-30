@@ -3,3 +3,5 @@ Repacked version of xaviermiller's hp "scan to folder" scripts over at https://f
 
 I did not write these. The LICENSE file is present because it asked me to put one there.
 These scripts are tweaked for my configuration. They almost certainly won't work for you without modification.
+
+Requires HPLIP, sane-utils, and imagemagick. HPLIP setup is a .py file, must be run with -i

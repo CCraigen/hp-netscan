@@ -1,0 +1,37 @@
+#!/bin/bash
+
+cd "`dirname $0`"
+
+source /etc/hp-netscan.conf
+
+set -o pipefail
+while true; do
+    # if scan pressed - run the command
+    name=`wget --quiet -O - http://${PRINTER}/hp/device/notifications.xml | grep "<StartScan>" | sed "s/^.*<StartScan>\([01]\)<\/StartScan>.*$/\1/g"`
+
+   if [ "$name" = "1" ]; then
+      # if [ -x "${HELPER_DIR}/$name" ]; then
+      AUTOFEED=`wget --quiet -O - http://${PRINTER}/hp/device/notifications.xml | grep "<ADFLoaded>" | tail --lines=1 | sed "s/^.*<ADFLoaded>\([01]\)<\/ADFLoaded>.*$/\1/g"`
+      OUTPUT_PREFIX="scan_$(date '+%Y%m%d-%H%M%S')"
+
+      # source "${HELPER_DIR}/$name"
+
+      if [ "$AUTOFEED" = "0" ]
+      then
+          scanimage -d hpaio:/net/${PRINTERNAME}?ip=${PRINTER} --format=pnm --mode=Color --resolution=300 > "${SCAN_DIR}/${OUTPUT_PREFIX}.pnm" 2> /dev/null 2>&1
+      else
+          scanimage -d hpaio:/net/${PRINTERNAME}?ip=${PRINTER} --format=pnm --mode=Gray --resolution=200 -x 215.9 -y 279.4 --batch="${SCAN_DIR}/${OUTPUT_PREFIX}-%d.pnm" --batch-start=1 --source Duplex > /dev/null 2>&1
+      fi
+
+      for pnm in $(find "${SCAN_DIR}" -type f -name ${OUTPUT_PREFIX}\*)
+      do
+          img=$(echo $pnm | sed -e s/.pnm$/.jpg/)
+          convert -quality 100% "${pnm}" "${img}" > /dev/null 2>&1
+          rm "${pnm}"
+          chmod a+rw "${img}"
+      done
+      # fi
+   fi
+
+    sleep 5
+done
