@@ -10,14 +10,14 @@
 
 start() {
   echo "Starting hp_netscan"
-  start-stop-daemon --start --exec /opt/hp-netscan/bin/scanloop \
+  start-stop-daemon --start --exec /usr/share/hp-netscan/scanloop \
     --pidfile /var/run/hp-netscan.pid -b -m
   echo $?
 }
 
 stop() {
   echo "Stopping hp_netscan"
-  start-stop-daemon --stop --exec /opt/hp-netscan/bin/scanloop \
+  start-stop-daemon --stop --exec /bin/bash \
     --pidfile /var/run/hp-netscan.pid
   echo $?
 }
